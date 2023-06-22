@@ -10,7 +10,7 @@ export const colorUseCase = {
     } else if (colorDict.black === undefined) {
       colorDict.black = userId;
       return 1;
-    } else if (colorDict.white === undefined) {
+    } else {
       colorDict.white = userId;
       return 2;
     }
