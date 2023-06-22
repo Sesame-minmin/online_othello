@@ -1,8 +1,7 @@
-import type { TaskModel } from '$/commonTypesWithClient/models';
 import { useAtom } from 'jotai';
-import type { ChangeEvent, FormEvent } from 'react';
 import { useEffect, useState } from 'react';
 import { Loading } from 'src/components/Loading/Loading';
+import { Cell } from 'src/components/cell';
 import { BasicHeader } from 'src/pages/@components/BasicHeader/BasicHeader';
 import { apiClient } from 'src/utils/apiClient';
 import { returnNull } from 'src/utils/returnNull';
@@ -11,66 +10,51 @@ import styles from './index.module.css';
 
 const Home = () => {
   const [user] = useAtom(userAtom);
-  const [tasks, setTasks] = useState<TaskModel[]>();
-  const [label, setLabel] = useState('');
-  const inputLabel = (e: ChangeEvent<HTMLInputElement>) => {
-    setLabel(e.target.value);
+  const [board, setBoard] = useState<number[][]>();
+  const judge: number[] = [2, 2];
+  const turnColor = 1;
+  const fetchboard = async () => {
+    const res = await apiClient.board.$get().catch(returnNull);
+    if (res !== null) {
+      setBoard(res);
+    }
   };
-  const fetchTasks = async () => {
-    const tasks = await apiClient.tasks.$get().catch(returnNull);
-
-    if (tasks !== null) setTasks(tasks);
-  };
-  const createTask = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!label) return;
-
-    await apiClient.tasks.post({ body: { label } });
-    setLabel('');
-    await fetchTasks();
-  };
-  const toggleDone = async (task: TaskModel) => {
-    await apiClient.tasks._taskId(task.id).patch({ body: { done: !task.done } });
-    await fetchTasks();
-  };
-  const deleteTask = async (task: TaskModel) => {
-    await apiClient.tasks._taskId(task.id).delete();
-    await fetchTasks();
+  const onClick = async (x: number, y: number) => {
+    await apiClient.board.$post({ body: { x, y } });
+    await fetchboard();
   };
 
   useEffect(() => {
-    fetchTasks();
+    const cancelId = setInterval(fetchboard, 500);
+    return () => {
+      clearInterval(cancelId);
+    };
   }, []);
-
-  if (!tasks || !user) return <Loading visible />;
+  if (!board || !user) return <Loading visible />;
 
   return (
     <>
       <BasicHeader user={user} />
-      <div className={styles.title} style={{ marginTop: '160px' }}>
-        Welcome to frourio!
+      <div className={styles.container}>
+        <div className={styles.board}>
+          {board.map((row, y) =>
+            row.map((color, x) => (
+              <Cell key={`${x}-${y}`} color={color} onClick={() => onClick(x, y)} />
+            ))
+          )}
+        </div>
+        <div className={styles.game}>
+          {judge[0] + judge[1] === 64 ? (
+            <h1>勝者は{judge[0] > judge[1] ? '黒' : '白'}です</h1>
+          ) : (
+            <h1>今は{turnColor === 1 ? '黒' : '白'}の番です</h1>
+          )}
+          <h2>黒：{judge[0]}枚</h2> <h2>白：{judge[1]}枚</h2>
+        </div>
+        <div className={styles.passbotton}>
+          <h1>パス</h1>
+        </div>
       </div>
-
-      <form style={{ textAlign: 'center', marginTop: '80px' }} onSubmit={createTask}>
-        <input value={label} type="text" onChange={inputLabel} />
-        <input type="submit" value="ADD" />
-      </form>
-      <ul className={styles.tasks}>
-        {tasks.map((task) => (
-          <li key={task.id}>
-            <label>
-              <input type="checkbox" checked={task.done} onChange={() => toggleDone(task)} />
-              <span>{task.label}</span>
-            </label>
-            <input
-              type="button"
-              value="DELETE"
-              className={styles.deleteBtn}
-              onClick={() => deleteTask(task)}
-            />
-          </li>
-        ))}
-      </ul>
     </>
   );
 };
