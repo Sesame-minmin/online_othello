@@ -64,6 +64,7 @@ $ npx prisma studio
 $ npm run notios
 ```
 
+
 Web ブラウザで http://localhost:3000 を開く
 
 開発時のターミナル表示は [notios](https://github.com/frouriojs/notios) で制御している
@@ -76,3 +77,5 @@ Web ブラウザで http://localhost:3000 を開く
 
 開発サーバー起動後のターミナルで `dev > [run-p] dev:* > dev:typecheckClient (あるいはtypecheckServer)` の順に開いて Enter を押すと型検査の結果が表示される  
 ファイルを保存するたびに更新されるのでブラウザで動かす前に型エラーを解消するとほとんどのバグがなくなる
+
+
