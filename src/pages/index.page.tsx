@@ -11,7 +11,6 @@ import styles from './index.module.css';
 const Home = () => {
   const [user] = useAtom(userAtom);
   const [board, setBoard] = useState<number[][]>();
-  const judge: number[] = [2, 2];
   const turnColor = 1;
   const fetchboard = async () => {
     const res = await apiClient.board.$get().catch(returnNull);
@@ -44,12 +43,20 @@ const Home = () => {
           )}
         </div>
         <div className={styles.game}>
-          {judge[0] + judge[1] === 64 ? (
-            <h1>勝者は{judge[0] > judge[1] ? '黒' : '白'}です</h1>
+          {board.flat().filter((n) => n === 0).length === 0 ? (
+            <h1>
+              勝者は
+              {board.flat().filter((n) => n === 1).length >
+              board.flat().filter((n) => n === 2).length
+                ? '黒'
+                : '白'}
+              です
+            </h1>
           ) : (
             <h1>今は{turnColor === 1 ? '黒' : '白'}の番です</h1>
           )}
-          <h2>黒：{judge[0]}枚</h2> <h2>白：{judge[1]}枚</h2>
+          <h2>黒：{board.flat().filter((n) => n === 1).length}枚</h2>{' '}
+          <h2>白：{board.flat().filter((n) => n === 2).length}枚</h2>
         </div>
         <div className={styles.passbotton}>
           <h1>パス</h1>
