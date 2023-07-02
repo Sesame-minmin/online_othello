@@ -11,7 +11,7 @@ const board: number[][] = [
   [0, 0, 0, 0, 0, 0, 0, 0],
   [0, 0, 0, 0, 0, 0, 0, 0],
 ];
-const di = [
+const directions: number[][] = [
   [1, 0],
   [1, 1],
   [0, 1],
@@ -47,21 +47,14 @@ const turnColor = (x: number, y: number, di: number[], goal: number[], userId: U
   }
 };
 export const boardUseCase = {
-  turnColor: () => 1,
   getBoard: () => board,
   clickBoard: (x: number, y: number, userId: UserId) => {
     console.log(111, x, y);
-    //ここに挟まれた石を反転させる処理させればいいんじゃない？
-    for (let i = 0; i < 8; i++) {
-      if (0 < x + di[i][1] && x + di[i][1] < 8 && 0 < y + di[i][0] && y + di[i][0] < 8) {
-        if (board[y + di[i][0]][x + di[i][1]] === 3 - colorUseCase.createColor(userId)) {
-          turnColor(
-            x,
-            y,
-            di[i],
-            next(x + di[i][1], y + di[i][0], di[i][1], di[i][0], userId),
-            userId
-          );
+    //ここに挟まれた石を反転させる処理させればいいんじゃない
+    for (const di of directions) {
+      if (0 < x + di[1] && x + di[1] < 8 && 0 < y + di[0] && y + di[0] < 8) {
+        if (board[y + di[0]][x + di[1]] === 3 - colorUseCase.createColor(userId)) {
+          turnColor(x, y, di, next(x + di[1], y + di[0], di[1], di[0], userId), userId);
           board[y][x] = colorUseCase.createColor(userId);
         }
       }
