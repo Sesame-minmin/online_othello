@@ -11,7 +11,7 @@ import styles from './index.module.css';
 const Home = () => {
   const [user] = useAtom(userAtom);
   const [board, setBoard] = useState<number[][]>();
-  const turnColor = 1;
+  const turnColor = [1];
   const fetchboard = async () => {
     const res = await apiClient.board.$get().catch(returnNull);
     if (res !== null) {
@@ -21,6 +21,7 @@ const Home = () => {
   const onClick = async (x: number, y: number) => {
     await apiClient.board.$post({ body: { x, y } });
     await fetchboard();
+    turnColor[0] = 3 - turnColor[0];
   };
 
   useEffect(() => {
@@ -53,7 +54,7 @@ const Home = () => {
               です
             </h1>
           ) : (
-            <h1>今は{turnColor === 1 ? '黒' : '白'}の番です</h1>
+            <h1>今は{turnColor[0] === 1 ? '黒' : '白'}の番です</h1>
           )}
           <h2>黒：{board.flat().filter((n) => n === 1).length}枚</h2>{' '}
           <h2>白：{board.flat().filter((n) => n === 2).length}枚</h2>
